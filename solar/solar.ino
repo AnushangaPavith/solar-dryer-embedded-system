@@ -64,7 +64,8 @@ double TotError = 0;
 
 bool fram = true;
 
-int Def_Servo = 90;
+int Def_Servo11 = 90;
+int Def_Servo12 = 90;
 
 void setup() {
   // put your setup code here, to run once:
@@ -152,22 +153,26 @@ void turnSolarPanel() {
   int LDRRight = analogRead(LDR2);
   int diff = (LDRRight >= LDRLeft) ? LDRRight - LDRLeft : LDRLeft - LDRRight;
 
-  while (diff > 100) {
+  Serial.print(LDRLeft);
+  Serial.print("      ");
+  Serial.println(LDRRight);
+
+  while (diff > 150) {
     Serial.print(LDRLeft);
     Serial.print("      ");
     Serial.println(LDRRight);
 
     if (LDRLeft > LDRRight) {
-      if (Def_Servo < 180) {
-        Def_Servo = Def_Servo + 10;
+      if (Def_Servo1 < 180) {
+        Def_Servo1 = Def_Servo1 + 1;
       }
-      SolarServo1.write(Def_Servo);
+      SolarServo1.write(Def_Servo1);
     }
     if (LDRLeft < LDRRight) {
-      if (Def_Servo > 0) {
-        Def_Servo = Def_Servo - 10;
+      if (Def_Servo1 > 0) {
+        Def_Servo1 = Def_Servo1 - 1;
       }
-      SolarServo1.write(Def_Servo);
+      SolarServo1.write(Def_Servo1);
     }
     delay(20);
     LDRLeft = analogRead(LDR1);
