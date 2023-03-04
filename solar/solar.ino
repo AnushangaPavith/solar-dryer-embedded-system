@@ -148,7 +148,9 @@ void getTemperature() {
   delay(1000);
 }
 
+// Function for rotate solar panel by rotating two servo motors
 void turnSolarPanel() {
+  // inital reading of ldr
   int LDRLeft = analogRead(LDR1);
   int LDRRight = analogRead(LDR2);
   int diff = (LDRRight >= LDRLeft) ? LDRRight - LDRLeft : LDRLeft - LDRRight;
@@ -157,6 +159,7 @@ void turnSolarPanel() {
   Serial.print("      ");
   Serial.println(LDRRight);
 
+// While the change is not in desireable range, rotate the solar panel
   while (diff > 150) {
     Serial.print(LDRLeft);
     Serial.print("      ");
@@ -164,6 +167,8 @@ void turnSolarPanel() {
 
     if (LDRLeft > LDRRight) {
       if (Def_Servo1 < 180 && Def_Servo2 > 0) {
+        // Rotate the servo motors in two side
+        // One in clockwise and other is anticlockwise
         Def_Servo1 = Def_Servo1 + 1;
         Def_Servo2 = Def_Servo2 - 1;
       }
@@ -172,17 +177,21 @@ void turnSolarPanel() {
     }
     if (LDRLeft < LDRRight) {
       if (Def_Servo1 > 0 && Def_Servo2 < 180) {
+        // Rotate the servo motors in two side
+        // One in clockwise and other is anticlockwise
         Def_Servo1 = Def_Servo1 - 1;
         Def_Servo2 = Def_Servo2 + 1;
       }
       SolarServo1.write(Def_Servo1);
       SolarServo2.write(Def_Servo2);
     }
-    delay(60);
+    /***** Reduce this delay to speed up solar panel rotation speed ******/
+    delay(50);
     LDRLeft = analogRead(LDR1);
     LDRRight = analogRead(LDR2);
     diff = (LDRRight >= LDRLeft) ? LDRRight - LDRLeft : LDRLeft - LDRRight;
 
+    // When the light intensity change is large, but the servo can't rotate anymore break the loop
     if(Def_Servo1 < 2 || Def_Servo1 > 178 || Def_Servo2 < 2 || Def_Servo2 > 178) {
       break;
     }
