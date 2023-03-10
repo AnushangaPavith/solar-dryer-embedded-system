@@ -145,11 +145,12 @@ void KeyPadinit() {
 
 void displayTempHumi(int temperature, int humidity) {
   LCD.setCursor(0, 0);
-  LCD.print("Temperature: ");
+  LCD.print("Temperature:");
   LCD.print(temperature);
+  LCD.print((char)223);
   LCD.print("C");
   LCD.setCursor(0, 1);
-  LCD.print("Humidity: ");
+  LCD.print("Humidity:");
   LCD.print(humidity);
   LCD.print("%");
 }
@@ -239,6 +240,7 @@ void getTemperature() {
           LCD.print("Max Temperature: ");
           LCD.setCursor(6, 1);
           LCD.print(String(maxTemp));
+          LCD.print((char)223);
           LCD.print("C");
           Serial.println();
           Serial.print("Max Temperature: ");
@@ -255,6 +257,7 @@ void getTemperature() {
       LCD.print("Max Temperature: ");
       LCD.setCursor(6, 1);
       LCD.print(String(maxTemp));
+      LCD.print((char)223);
       LCD.print("C");
       Serial.println();
       Serial.print("Max Temperature: ");
