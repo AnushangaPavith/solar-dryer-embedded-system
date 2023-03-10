@@ -34,18 +34,18 @@ int FAN = 4;
 
 
 // Setup keypad
-const byte NbrRows = 4;                           // Number of Rows 
-const byte NbrColumns = 4;                        // Number of Columns
+const byte NbrRows = 4;     // Number of Rows
+const byte NbrColumns = 4;  // Number of Columns
 
 char KeyPadLayout[NbrRows][NbrColumns] = {
-  {'1','2','3','A'}, 
-  {'4','5','6','B'},
-  {'7','8','9','C'},
-  {'*','0','#','D'}
+  { '1', '2', '3', 'A' },
+  { '4', '5', '6', 'B' },
+  { '7', '8', '9', 'C' },
+  { '*', '0', '#', 'D' }
 };
 
-byte PinsLines[NbrRows] = { 0, 1, 2, 3};          //  ROWS Pins
-byte PinsColumns[NbrColumns] = {4, 5, 6, 7};      //  COLUMNS Pins
+byte PinsLines[NbrRows] = { 0, 1, 2, 3 };       //  ROWS Pins
+byte PinsColumns[NbrColumns] = { 4, 5, 6, 7 };  //  COLUMNS Pins
 
 LiquidCrystal_I2C LCD(I2C_Addr_LCD, 16, 2);  //LCD Display parameters
 Keypad_I2C i2cKeypad(makeKeymap(KeyPadLayout), PinsLines, PinsColumns, NbrRows, NbrColumns, I2C_Addr_KEYPAD);
@@ -107,8 +107,8 @@ void loop() {
   int Temperature = HT_Sensor.readTemperature();
   // Display temperature and humidity
   displayTempHumi(Temperature, Humidity);
-  
-  // getTemperature();
+
+  getTemperature();
 
   controlTemperature(Temperature);
   delay(2000);
@@ -141,8 +141,9 @@ void displayTempHumi(int temperature, int humidity) {
 }
 
 void getTemperature() {
-  char keyRead = i2cKeypad.getKey();
+  char KeyRead = i2cKeypad.getKey();
   // Wait until press A
+  LCD.clear();
   LCD.setCursor(0, 0);
   LCD.print("Press A to setup");
   LCD.setCursor(0, 1);
@@ -150,20 +151,28 @@ void getTemperature() {
 
   int count = 0;
 
-  while (KeyRead == NO_KEY) {}
-  
+  /*while (KeyRead == NO_KEY) {
+    count++;
+    delay(300);
+
+    if (count >= 100 || KeyRead != NO_KEY) {
+      break;
+    }
+  }*/
+
   if (KeyRead != NO_KEY) {
-    
+    Serial.println(KeyRead);
+    if (KeyRead == 'A') {
+      LCD.clear();
+      LCD.setCursor(0, 0);
+      LCD.print("Enter Temperature");
+      LCD.setCursor(0, 1);
+      LCD.print("here");
+    }
   }
 
-  Serial.print(key);
-  if (key == 'A') {
-    LCD.clear();
-    LCD.setCursor(0, 0);
-    LCD.print("Enter Temperature");
-    LCD.setCursor(0, 1);
-    LCD.print("here");
-  }
+  Serial.print(KeyRead);
+
   delay(1000);
 }
 
@@ -178,7 +187,7 @@ void turnSolarPanel() {
   Serial.print("      ");
   Serial.println(LDRRight);
 
-// While the change is not in desireable range, rotate the solar panel
+  // While the change is not in desireable range, rotate the solar panel
   while (diff > 150) {
     Serial.print(LDRLeft);
     Serial.print("      ");
@@ -211,7 +220,7 @@ void turnSolarPanel() {
     diff = (LDRRight >= LDRLeft) ? LDRRight - LDRLeft : LDRLeft - LDRRight;
 
     // When the light intensity change is large, but the servo can't rotate anymore break the loop
-    if(Def_Servo1 < 2 || Def_Servo1 > 178 || Def_Servo2 < 2 || Def_Servo2 > 178) {
+    if (Def_Servo1 < 2 || Def_Servo1 > 178 || Def_Servo2 < 2 || Def_Servo2 > 178) {
       break;
     }
   }
