@@ -79,11 +79,11 @@ int Def_Servo2 = 90;
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
-  
+
   // setup fans
   pinMode(FAN, OUTPUT);
   digitalWrite(FAN, LOW);
-  
+
   delay(200);
   // Start DHT22 sensor
   HT_Sensor.begin();
@@ -97,7 +97,7 @@ void setup() {
   SolarServo2.attach(23);
   Serial.println("Start lcd");
   LCD.print("    Welcome!");
-  
+
   delay(3000);
   LCD.clear();
 }
@@ -115,6 +115,7 @@ void loop() {
 
   delay(6000);
 
+  // Set temperature
   getTemperature();
 
   displayTempHumi(Temperature, Humidity);
@@ -171,26 +172,28 @@ void getTemperature() {
     if (KeyRead == 'A') {
       LCD.clear();
       LCD.setCursor(0, 0);
-      LCD.print("Enter Temperature");
+      LCD.print("Set Temperature");
       LCD.setCursor(0, 1);
 
       char input[3];  // array to store the input
       int i = 0;      // index variable for the array
 
-      while (i < 2 && (millis() - startTime) < 5000) {  //wait for input for 10 seconds
+      while (i < 2 && (millis() - startTime) < 30000) {  //wait for input for 30 seconds
         char newKey = i2cKeypad.getKey();
 
         if (newKey != NO_KEY && isDigit(newKey)) {  // if a digit key is pressed
           input[i] = newKey;                        // store the digit in the array
           Serial.print(newKey);                     // print the digit to the serial monitor
-          // print in lcd
-          i++;  // increment the index variable
+          LCD.print(newKey);                        // Print in the LCD
+          i++;                                      // increment the index variable
         }
       }
       input[2] = '\0';        // add null character at the end of the array
       maxTemp = atoi(input);  // convert the input to an integer
+      maxTemp = (maxTemp == 0) ? 40 : maxTemp;
       Serial.print("Max Temperature: ");
       Serial.println(maxTemp);
+      delay(4000);
     }
   }
 
