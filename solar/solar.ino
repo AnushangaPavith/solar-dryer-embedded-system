@@ -83,7 +83,7 @@ void setup() {
 
   // setup fans
   pinMode(FAN, OUTPUT);
-  digitalWrite(FAN, LOW);
+  digitalWrite(FAN, HIGH);
 
   delay(200);
   // Start DHT22 sensor
@@ -236,8 +236,10 @@ void getTemperature() {
           maxTemp = (maxTemp == 0) ? 40 : maxTemp;
           delay(1500);
           LCD.clear();
-          LCD.print("Max Temperature: ")
+          LCD.print("Max Temperature: ");
+          LCD.setCursor(6, 1);
           LCD.print(String(maxTemp));
+          LCD.print("C");
           Serial.println();
           Serial.print("Max Temperature: ");
           Serial.println(maxTemp);
@@ -245,6 +247,20 @@ void getTemperature() {
           return;
         }
       }
+      input[2] = '\0';        // add null character at the end of the array
+      maxTemp = atoi(input);  // convert the input to an integer
+      maxTemp = (maxTemp == 0) ? 40 : maxTemp;
+      delay(1500);
+      LCD.clear();
+      LCD.print("Max Temperature: ");
+      LCD.setCursor(6, 1);
+      LCD.print(String(maxTemp));
+      LCD.print("C");
+      Serial.println();
+      Serial.print("Max Temperature: ");
+      Serial.println(maxTemp);
+      delay(3500);
+      return;
     }
 
     delay(1000);
