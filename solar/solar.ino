@@ -178,7 +178,10 @@ void getTemperature() {
       char input[3];  // array to store the input
       int i = 0;      // index variable for the array
 
+      char specificKeys[] = { 'A', '#', 'D' };
+      startTime = millis();                              // reset timer
       while (i < 2 && (millis() - startTime) < 30000) {  //wait for input for 30 seconds
+        boolean keyFound = false;
         char newKey = i2cKeypad.getKey();
 
         if (newKey != NO_KEY && isDigit(newKey)) {  // if a digit key is pressed
@@ -186,8 +189,30 @@ void getTemperature() {
           Serial.print(newKey);                     // print the digit to the serial monitor
           LCD.print(newKey);                        // Print in the LCD
           i++;                                      // increment the index variable
+        } else {
+          for (int j = 0; j < sizeof(specificKeys); j++) {
+            if (newKey == specificKeys[j]) {
+              keyFound = true;
+              break;
+            }
+          }
+          if (keyFound) {
+            if (newKey == 'A') {
+              i = 0;
+              LCD.clear();
+              LCD.setCursor(0, 0);
+              LCD.print("Set Temperature");
+              LCD.setCursor(0, 1);
+            } else if (newKey == '#') {
+
+            } else if (newKey == 'D') {
+              input[i + 1] = '\0';
+              break;
+            }
+          }
         }
       }
+
       input[2] = '\0';        // add null character at the end of the array
       maxTemp = atoi(input);  // convert the input to an integer
       maxTemp = (maxTemp == 0) ? 40 : maxTemp;
