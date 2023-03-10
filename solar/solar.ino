@@ -5,7 +5,7 @@
 #include <Keypad.h>
 #include <Servo.h>
 
-#define I2C_Addr_KEYPAD 0x48
+#define I2C_Addr_KEYPAD 0x20
 #define I2C_Addr_LCD 0x27
 
 // Setup sensors
@@ -14,17 +14,14 @@ DHT22 - pin 13
 
 LDR1 - pin 34
 LDR2 - pin 35
-LCD
+LCD & keypad
   SDA - pin 21
   SCL - pin 22
-Keypad pins:
-  row pins: 16,17,18,19
-  col pins: 26,27,32,33
 fans - pin 4
 servo 
     pin 12
     pin 14
-available: 5,14,15,25,
+    
 */
 
 DHT HT_Sensor(13, DHT22);  //Temperature, Humidity sensor
@@ -56,6 +53,7 @@ Servo SolarServo2;
 // functions
 void LDRinit();
 void LCDinit();
+void KeyPadinit();
 void displayTempHumi(int, int);
 void getTemperature();
 void controlTemperature(int);
@@ -65,7 +63,7 @@ void image02();
 void turnSolarPanel();
 
 // Variables
-int maxTemp = 32;
+int maxTemp = 40;
 
 double Kp = 2;
 double Kd = 2;
@@ -80,19 +78,26 @@ int Def_Servo2 = 90;
 
 void setup() {
   // put your setup code here, to run once:
-  HT_Sensor.begin();
   Serial.begin(9600);
+  
+  // setup fans
+  pinMode(FAN, OUTPUT);
+  digitalWrite(FAN, LOW);
+  
+  delay(200);
+  // Start DHT22 sensor
+  HT_Sensor.begin();
+  // Start I2C bus
+  Wire.begin(21, 22);
   Serial.println("Start program");
   LDRinit();
   LCDinit();
+  KeyPadinit();
   SolarServo1.attach(12);
   SolarServo2.attach(23);
   Serial.println("Start lcd");
   LCD.print("    Welcome!");
-
-  // setup fans
-  pinMode(FAN, OUTPUT);
-
+  
   delay(3000);
   LCD.clear();
 }
@@ -108,14 +113,17 @@ void loop() {
   // Display temperature and humidity
   displayTempHumi(Temperature, Humidity);
 
+  delay(6000);
+
   getTemperature();
 
+  displayTempHumi(Temperature, Humidity);
   controlTemperature(Temperature);
   delay(2000);
   // Rotate solar panel
   turnSolarPanel();
 
-  delay(500);
+  delay(5000);
 }
 
 void LDRinit() {
@@ -127,6 +135,10 @@ void LCDinit() {
   LCD.init();
   LCD.backlight();
   LCD.setCursor(0, 0);
+}
+
+void KeyPadinit() {
+  i2cKeypad.begin();  // Start i2cKeypad
 }
 
 void displayTempHumi(int temperature, int humidity) {
@@ -141,6 +153,7 @@ void displayTempHumi(int temperature, int humidity) {
 }
 
 void getTemperature() {
+  unsigned long startTime = millis();  //get the start time
   char KeyRead = i2cKeypad.getKey();
   // Wait until press A
   LCD.clear();
@@ -149,16 +162,9 @@ void getTemperature() {
   LCD.setCursor(0, 1);
   LCD.print("Temperature.");
 
-  int count = 0;
-
-  /*while (KeyRead == NO_KEY) {
-    count++;
-    delay(300);
-
-    if (count >= 100 || KeyRead != NO_KEY) {
-      break;
-    }
-  }*/
+  while (KeyRead == NO_KEY && (millis() - startTime) < 10000) {  //wait for input for 10 seconds
+    KeyRead = i2cKeypad.getKey();                                //get the keypad input again
+  }
 
   if (KeyRead != NO_KEY) {
     Serial.println(KeyRead);
@@ -167,11 +173,26 @@ void getTemperature() {
       LCD.setCursor(0, 0);
       LCD.print("Enter Temperature");
       LCD.setCursor(0, 1);
-      LCD.print("here");
+
+      char input[3];  // array to store the input
+      int i = 0;      // index variable for the array
+
+      while (i < 2 && (millis() - startTime) < 5000) {  //wait for input for 10 seconds
+        char newKey = i2cKeypad.getKey();
+
+        if (newKey != NO_KEY && isDigit(newKey)) {  // if a digit key is pressed
+          input[i] = newKey;                        // store the digit in the array
+          Serial.print(newKey);                     // print the digit to the serial monitor
+          // print in lcd
+          i++;  // increment the index variable
+        }
+      }
+      input[2] = '\0';        // add null character at the end of the array
+      maxTemp = atoi(input);  // convert the input to an integer
+      Serial.print("Max Temperature: ");
+      Serial.println(maxTemp);
     }
   }
-
-  Serial.print(KeyRead);
 
   delay(1000);
 }
