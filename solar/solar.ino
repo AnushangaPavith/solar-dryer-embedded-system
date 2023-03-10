@@ -20,7 +20,7 @@ LCD & keypad
 fans - pin 4
 servo 
     pin 12
-    pin 14
+    pin 23
     
 */
 
