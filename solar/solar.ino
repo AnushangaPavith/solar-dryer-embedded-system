@@ -1,12 +1,17 @@
 #include <DHT.h>
 #include <LiquidCrystal_I2C.h>
 #include <Wire.h>
+#include <Keypad_I2C.h>
 #include <Keypad.h>
 #include <Servo.h>
+
+#define I2C_Addr_KEYPAD 0x48
+#define I2C_Addr_LCD 0x27
 
 // Setup sensors
 /*
 DHT22 - pin 13
+
 LDR1 - pin 34
 LDR2 - pin 35
 LCD
@@ -26,18 +31,24 @@ DHT HT_Sensor(13, DHT22);  //Temperature, Humidity sensor
 int LDR1 = 34;
 int LDR2 = 35;
 int FAN = 4;
-LiquidCrystal_I2C LCD(0x27, 16, 2);  //LCD Display parameters
+
+
 // Setup keypad
-byte rowPins[4] = { 16, 17, 18, 19 };  //Keypad input pins
-byte colPins[4] = { 26, 27, 32, 33 };  //Keypad input pins
-char keys[4][4] = {
-  { '1', '2', '3', 'A' },
-  { '4', '5', '6', 'B' },
-  { '7', '8', '9', 'C' },
-  { '*', '0', '#', 'D' },
+const byte NbrRows = 4;                           // Number of Rows 
+const byte NbrColumns = 4;                        // Number of Columns
+
+char KeyPadLayout[NbrRows][NbrColumns] = {
+  {'1','2','3','A'}, 
+  {'4','5','6','B'},
+  {'7','8','9','C'},
+  {'*','0','#','D'}
 };
 
-Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, 4, 4);
+byte PinsLines[NbrRows] = { 0, 1, 2, 3};          //  ROWS Pins
+byte PinsColumns[NbrColumns] = {4, 5, 6, 7};      //  COLUMNS Pins
+
+LiquidCrystal_I2C LCD(I2C_Addr_LCD, 16, 2);  //LCD Display parameters
+Keypad_I2C i2cKeypad(makeKeymap(KeyPadLayout), PinsLines, PinsColumns, NbrRows, NbrColumns, I2C_Addr_KEYPAD);
 
 Servo SolarServo1;
 Servo SolarServo2;
@@ -96,12 +107,13 @@ void loop() {
   int Temperature = HT_Sensor.readTemperature();
   // Display temperature and humidity
   displayTempHumi(Temperature, Humidity);
+  
   // getTemperature();
+
   controlTemperature(Temperature);
   delay(2000);
   // Rotate solar panel
   turnSolarPanel();
-
 
   delay(500);
 }
@@ -129,14 +141,21 @@ void displayTempHumi(int temperature, int humidity) {
 }
 
 void getTemperature() {
-  char key = keypad.getKey();
+  char keyRead = i2cKeypad.getKey();
   // Wait until press A
   LCD.setCursor(0, 0);
   LCD.print("Press A to setup");
   LCD.setCursor(0, 1);
   LCD.print("Temperature.");
 
-  while (!key) {}
+  int count = 0;
+
+  while (KeyRead == NO_KEY) {}
+  
+  if (KeyRead != NO_KEY) {
+    
+  }
+
   Serial.print(key);
   if (key == 'A') {
     LCD.clear();
