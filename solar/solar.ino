@@ -55,6 +55,7 @@ void LDRinit();
 void LCDinit();
 void KeyPadinit();
 void displayTempHumi(int, int);
+int inputVerify(char);
 void getTemperature();
 void controlTemperature(int);
 void Animate();
@@ -178,10 +179,9 @@ void getTemperature() {
       char input[3];  // array to store the input
       int i = 0;      // index variable for the array
 
-      char specificKeys[] = { 'A', '#', 'D' };
       startTime = millis();                              // reset timer
       while (i < 2 && (millis() - startTime) < 30000) {  //wait for input for 30 seconds
-        boolean keyFound = false;
+
         char newKey = i2cKeypad.getKey();
 
         if (newKey != NO_KEY && isDigit(newKey)) {  // if a digit key is pressed
@@ -189,26 +189,22 @@ void getTemperature() {
           Serial.print(newKey);                     // print the digit to the serial monitor
           LCD.print(newKey);                        // Print in the LCD
           i++;                                      // increment the index variable
-        } else {
-          for (int j = 0; j < sizeof(specificKeys); j++) {
-            if (newKey == specificKeys[j]) {
-              keyFound = true;
-              break;
-            }
-          }
-          if (keyFound) {
-            if (newKey == 'A') {
-              i = 0;
-              LCD.clear();
-              LCD.setCursor(0, 0);
-              LCD.print("Set Temperature");
-              LCD.setCursor(0, 1);
-            } else if (newKey == '#') {
+        } else if (newKey != NO_KEY) {
+          int state = inputVerify(newKey);
+          /*
+           2 - Restart
+           3 - Not yet configured
+           1 - Done 
+           0 - Not a specific key */
 
-            } else if (newKey == 'D') {
-              input[i + 1] = '\0';
-              break;
-            }
+          if (state == 0) continue;
+          else if (state == 1) break;
+          else if (state == 2) {
+            i = 0;
+            LCD.clear();
+            LCD.setCursor(0, 0);
+            LCD.print("Set Temperature");
+            LCD.setCursor(0, 1);
           }
         }
       }
@@ -216,13 +212,42 @@ void getTemperature() {
       input[2] = '\0';        // add null character at the end of the array
       maxTemp = atoi(input);  // convert the input to an integer
       maxTemp = (maxTemp == 0) ? 40 : maxTemp;
+      Serial.println();
       Serial.print("Max Temperature: ");
       Serial.println(maxTemp);
       delay(4000);
     }
-  }
 
-  delay(1000);
+    delay(1000);
+  }
+}
+
+int inputVerify(char key) {
+  char specificKeys[] = { 'A', '#', 'D' };
+  boolean keyFound = false;
+
+  for (int j = 0; j < sizeof(specificKeys); j++) {
+    if (key == specificKeys[j]) {
+      Serial.println("Special key found");
+      keyFound = true;
+      break;
+    }
+  }
+  if (keyFound) {
+    if (key == 'A') {
+      /* Restart */
+      return 2;
+    } else if (key == '#') {
+      /* Do something */
+      return 3;
+    } else if (key == 'D') {
+      /* Done */
+      return 1;
+    } else {
+      /* Not a specific key */
+      return 0;
+    }
+  }
 }
 
 // Function for rotate solar panel by rotating two servo motors
