@@ -192,9 +192,9 @@ void getTemperature() {
         } else if (newKey != NO_KEY) {
           int state = inputVerify(newKey);
           /*
+           1 - Done
            2 - Restart
            3 - Not yet configured
-           1 - Done 
            0 - Not a specific key */
 
           if (state == 0) continue;
@@ -209,13 +209,42 @@ void getTemperature() {
         }
       }
 
-      input[2] = '\0';        // add null character at the end of the array
-      maxTemp = atoi(input);  // convert the input to an integer
-      maxTemp = (maxTemp == 0) ? 40 : maxTemp;
-      Serial.println();
-      Serial.print("Max Temperature: ");
-      Serial.println(maxTemp);
-      delay(4000);
+      startTime = millis();  // reset timer
+      char confirmKey = i2cKeypad.getKey();
+      while (confirmKey == NO_KEY && (millis() - startTime) < 5000 && inputVerify(confirmKey)) {  // Wait either 5 seconds or user input A, D or #
+        confirmKey = i2cKeypad.getKey();
+      }
+      if (confirmKey != NO_KEY) {
+        int state = inputVerify(confirmKey);
+        /*
+        1 - Done
+        2 - Restart
+        3 - Not yet configured
+        0 - Not a specific key */
+
+        if (state == 2) {
+          LCD.clear();
+          LCD.setCursor(0, 0);
+          LCD.print("Temperature did");
+          LCD.setCursor(0, 1);
+          LCD.print("not set.");
+          delay(2500);
+          return;
+        } else if (state == 1) {
+          input[2] = '\0';        // add null character at the end of the array
+          maxTemp = atoi(input);  // convert the input to an integer
+          maxTemp = (maxTemp == 0) ? 40 : maxTemp;
+          delay(1500);
+          LCD.clear();
+          LCD.print("Max Temperature: ")
+          LCD.print(String(maxTemp));
+          Serial.println();
+          Serial.print("Max Temperature: ");
+          Serial.println(maxTemp);
+          delay(3500);
+          return;
+        }
+      }
     }
 
     delay(1000);
