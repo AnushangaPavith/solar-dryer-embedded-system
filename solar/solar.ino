@@ -310,7 +310,7 @@ void turnSolarPanel() {
   Serial.println(LDRRight);
 
   // While the change is not in desireable range, rotate the solar panel
-  while (diff > 150) {
+  while (diff > 50) {
     Serial.print(LDRLeft);
     Serial.print("      ");
     Serial.println(LDRRight);
