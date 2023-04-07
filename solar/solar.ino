@@ -96,6 +96,8 @@ void setup() {
   KeyPadinit();
   SolarServo1.attach(12);
   SolarServo2.attach(23);
+  SolarServo1.write(Def_Servo1);
+  SolarServo2.write(Def_Servo2);
   Serial.println("Start lcd");
   LCD.print("    Welcome!");
 
@@ -114,7 +116,7 @@ void loop() {
   // Display temperature and humidity
   displayTempHumi(Temperature, Humidity);
 
-  delay(6000);
+  delay(5000);
 
   // Set temperature
   getTemperature();
@@ -264,6 +266,9 @@ void getTemperature() {
       Serial.println(maxTemp);
       delay(3500);
       return;
+    } else if (KeyRead == '*') {
+      SolarServo1.write(90);
+      SolarServo2.write(90);
     }
 
     delay(1000);
@@ -316,7 +321,7 @@ void turnSolarPanel() {
     Serial.println(LDRRight);
 
     if (LDRLeft > LDRRight) {
-      if (Def_Servo1 < 180 && Def_Servo2 > 0) {
+      if (Def_Servo1 < 135 && Def_Servo2 > 45) {
         // Rotate the servo motors in two side
         // One in clockwise and other is anticlockwise
         Def_Servo1 = Def_Servo1 + 1;
@@ -326,7 +331,7 @@ void turnSolarPanel() {
       SolarServo2.write(Def_Servo2);
     }
     if (LDRLeft < LDRRight) {
-      if (Def_Servo1 > 0 && Def_Servo2 < 180) {
+      if (Def_Servo1 > 45 && Def_Servo2 < 135) {
         // Rotate the servo motors in two side
         // One in clockwise and other is anticlockwise
         Def_Servo1 = Def_Servo1 - 1;
@@ -342,7 +347,7 @@ void turnSolarPanel() {
     diff = (LDRRight >= LDRLeft) ? LDRRight - LDRLeft : LDRLeft - LDRRight;
 
     // When the light intensity change is large, but the servo can't rotate anymore break the loop
-    if (Def_Servo1 < 2 || Def_Servo1 > 178 || Def_Servo2 < 2 || Def_Servo2 > 178) {
+    if (Def_Servo1 < 47 || Def_Servo1 > 133 || Def_Servo2 < 47 || Def_Servo2 > 133) {
       break;
     }
   }
